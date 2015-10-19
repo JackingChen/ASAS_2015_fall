@@ -37,8 +37,11 @@ x = x(:);
 %
 % type 'help fir1' for more details.
 % 
-f_cut = 1000; % Hz
-h = fir1(128,f_cut/(fs/2));
+f_cut_head = 2200; % Hz
+f_cut_head_norm=double(f_cut_head/(fs/2));
+f_cut_tail=  2500; 
+f_cut_tail_norm= double(f_cut_tail/(fs/2));
+h = fir1(128,[f_cut_head_norm f_cut_tail_norm]);
 h = h(:);
 
 % set length of output
@@ -58,19 +61,21 @@ x_zp = zeros(N_zp,1);
 h_zp = zeros(N_zp,1);
 h_zp(1:N_taps) = h; % zero-padded impulse response
 H = fft(h_zp);
-
+%%
 %********** Please implement your OLA algorithm *************%
 tic
+y2=[];
 for mm = 1:num_frame
     t_start = (mm-1)*hopsize;    
     tt = (t_start+1):(t_start+N);
-    x_win = ...; % windowing
-    x_zp()= ...; % zero-padding
+    x_win = x(tt).*win; % windowing
+    x_zp= zeros(N_zp,1); % zero-padding
+    x_zp(1:length(x_win))=x_win;
     
     % Filtering using direct multiplication in freq. domain
-    X = ...; 
-    Y = ...; 
-    y_win = ...; %ifft
+    X = fft(x_zp); 
+    Y = H.*X; 
+    y_win = ifft(Y); %ifft
     
     % plot FFT
     if sw.plotFFT,
@@ -88,7 +93,8 @@ for mm = 1:num_frame
     
     % overlap-add 
     tt2 = 1:(N+N_taps-1);
-    y(t_start+tt2) = ...; 
+    y(t_start+tt2) = y(t_start+tt2)+y_win(tt2); 
+    %y2=[y2; y_win(tt2)];
     
     % plot FFT
     if sw.plotFFT,
@@ -106,4 +112,5 @@ for mm = 1:num_frame
 end
 toc;
 %************************************************************%
-sound(y,fs);
+%sound(y,fs);
+wavwrite(y,fs,'lab4.wav');
