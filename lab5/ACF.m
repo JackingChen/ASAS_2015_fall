@@ -26,9 +26,22 @@ end
 for ii = 1:frame_num
     if ii ~= frame_num
         %%%%%%%%%%%%%%%%%%% YOUR CODE BELOW %%%%%%%%%%%%%%%%%%%
-        ACF_func{ii} = autocorr(wav_file(st(ii):ed(ii)));
-        [~,I] = sort(ACF_func{ii},'descend');
-        out.pitch(ii) = fs/I(3);
+        ACF_func{ii} = autocorr(wav_file(st(ii):ed(ii)),70);
+%         xx=1:1:length(ACF_func{ii});
+%         
+%         if ii>5 && ii<10
+%             figure()
+%             plot(xx,ACF_func{ii})
+%         end
+        [pks loc]=findpeaks(ACF_func{ii},'MinPeakHeight',0.1);
+%         pks_sarray=sort(pks,'descend');
+%         largepks=pks(3);
+%         T=loc(find(pks==largepks));
+        T=loc(2);
+        [V,I] = sort(ACF_func{ii},'descend');
+        period=T/fs;
+        pitch=1/period;
+        out.pitch(ii) = pitch;
         %%%%%%%%%%%%%%%%%%% YOUR CODE ABOVE %%%%%%%%%%%%%%%%%%%
     else
         ACF_func{ii} = zeros(window_length,1);

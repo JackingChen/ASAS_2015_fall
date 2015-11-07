@@ -9,7 +9,7 @@ close all;
 
 %% Parameters
 fs = 8000;
-window_time = 0.05;
+window_time = 0.01;
 nBits = 16;
 nChannels = 1;
 opt = 1;
