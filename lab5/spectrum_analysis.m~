@@ -1,4 +1,4 @@
-function out = spectrum_analysis(wav_file,fs,window_length,poly_n)
+function out = spectrum_analysis(wav_file,fs,window_length)
 
 hop_size = window_length/2;
 wav_length = length(wav_file);
@@ -44,15 +44,15 @@ out.pitch = zeros(frame_num,1);
 starting=5;
 ending=10;
 count=0;
+poly_n=10;
 
 for ii = 1:frame_num-1
     %restrict the pitch 
     spectra{ii}(find(spectra{ii}(:,1)<50 | spectra{ii}(:,1)>500),2)=0;
-    if poly_n>0
-        % model the spectrum with ploynomial cn*x^poly_n+...c1*x^1+c0
-        p=polyfit(spectra{ii}(:,1),spectra{ii}(:,2),poly_n); %train parameter p
-        spectra{ii}(:,2)=polyval(p,spectra{ii}(:,1));% use p to reconstruct spectra
-    end
+    % model the spectrum with ploynomial cn*x^poly_n+...c1*x^1+c0
+    p=polyfit(spectra{ii}(:,1),spectra{ii}(:,2),poly_n); %train parama
+    spectra{ii}(:,2)=polyval(p,spectra{ii}(:,1));
+    
     [pks,locs] = findpeaks(spectra{ii}(:,2));
     xx=1:1:length(spectra{ii}(:,2));
     count=ii;

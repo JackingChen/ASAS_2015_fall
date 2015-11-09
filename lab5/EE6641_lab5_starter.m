@@ -9,9 +9,10 @@ close all;
 
 %% Parameters
 fs = 8000;
-window_time = 0.01;
+window_time = 0.05;
 nBits = 16;
 nChannels = 1;
+poly_n=-1;
 opt = 1;
 
 %% Main
@@ -28,9 +29,9 @@ fprintf('Playing your sound...\n');
 play(recObj);
 
 data = getaudiodata(recObj);
-
+%%
 if opt == 1
-    result = spectrum_analysis(data,fs,window_length);
+    result = spectrum_analysis(data,fs,window_length,poly_n);
 else
     result = ACF(data,fs,window_length);
 end
@@ -43,3 +44,4 @@ end
 
 figure()
 plot(time_array,result.pitch);
+%%
