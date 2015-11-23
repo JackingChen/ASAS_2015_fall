@@ -1,5 +1,5 @@
 function [amps,freqs]=findpeaks_starter(X, maxNumPeaks,th)
-%%
+% %%
 % X=spec(:,1);
 % X=abs(X);
 % maxNumPeaks=maxPeaks;
@@ -12,6 +12,8 @@ data = 20*log10(abs(X)); %intensity in db scale
 data=data(:);
 ind=find( (data>[data(1)-100;data((1:N-1)')]) ...
     & (data>=[data((2:N)'); data(N)-100]) );   % find peaks. "ind" means the locations of the peaks
+
+Peaksmax=length(ind);
 %%
 %
 % You might need to use SORTROWS() to identify highest peaks for each
@@ -27,7 +29,16 @@ ind=find( (data>[data(1)-100;data((1:N-1)')]) ...
 %     
 %%%%%%%%%%%%%%%%%%%%% YOUR CODE ABOVE %%%%%%%%%%%%%%%%%%%%%%
 
-for j=1:maxNumPeaks
+
+if Peaksmax > maxNumPeaks
+    peaktmp=ind_S(1:maxNumPeaks);
+    amps=zeros(maxNumPeaks,1);
+    freqs=zeros(maxNumPeaks,1);
+    amps(:)=data(peaktmp);
+    freqs(:)=peaktmp;
+    peaks_collect=[amps freqs];
+else
+    for j=1:maxNumPeaks
         %% Implement quadratic interpolation here, and save the
         % amplitude and frequencies of the peaks in a matrix peaks.
         % The first column of PEAKS should be all the estimated amplitudes
@@ -35,33 +46,33 @@ for j=1:maxNumPeaks
         % be all the frequency locations.
         % ....
         % ....
-    %%%%%%%%%%%%%%%%%%%%% YOUR CODE BELOW %%%%%%%%%%%%%%%%%%%%%%
-    
-    rmax=ind_S(j);
-    if X(rmax)<th
-        xmax=zeros(maxNumPeaks,1);
-        ymax=zeros(maxNumPeaks,1);
-        peaks_collect=[ymax xmax];
-        break;
-    elseif rmax==1
-        xmax=rmax;
-        ymax=data(rmax);
+        %%%%%%%%%%%%%%%%%%%%% YOUR CODE BELOW %%%%%%%%%%%%%%%%%%%%%%
         
-    else
-        L_n= data(rmax-1); L_m=data(rmax); L_p=data(rmax+1);
-        A=(L_p+L_n-2*(L_m))/2;
-        B=(L_p-L_n)/2;
-        C=L_m;
-        xmax=-B/2/A+rmax*(8000/length(X(:,1)));%interpolate around the interested point
-        ymax=C-(B^2)/4/A;
+        rmax=ind_S(j);
+        if X(rmax)<th
+            xmax=zeros(maxNumPeaks,1);
+            ymax=zeros(maxNumPeaks,1);
+            peaks_collect=[ymax xmax];
+            break;
+        elseif rmax==1
+            xmax=rmax;
+            ymax=data(rmax);
+            
+        else
+            L_n= data(rmax-1); L_m=data(rmax); L_p=data(rmax+1);
+            A=(L_p+L_n-2*(L_m))/2;
+            B=(L_p-L_n)/2;
+            C=L_m;
+            xmax=-B/2/A+rmax*(8000/length(X(:,1)));%interpolate around the interested point
+            ymax=C-(B^2)/4/A;
+            
+        end
+        peaks_collect=[peaks_collect;[ymax xmax]];
+        %%%%%%%%%%%%%%%%%%%%% YOUR CODE ABOVE %%%%%%%%%%%%%%%%%%%%%%
+        
         
     end
-    peaks_collect=[peaks_collect;[ymax xmax]];
-    %%%%%%%%%%%%%%%%%%%%% YOUR CODE ABOVE %%%%%%%%%%%%%%%%%%%%%%
-        
-        
 end
-
 %% Return the list of amps and freqs in the order of ascending frequency
 %%%%%%%%%%%%%%%%%%%%% YOUR CODE BELOW %%%%%%%%%%%%%%%%%%%%%%
     peaks_sort=sort(peaks_collect,1);

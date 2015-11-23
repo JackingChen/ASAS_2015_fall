@@ -59,7 +59,7 @@ spec=zeros(frame_size,nFrames);
 % hold on
 % plot(tt,F','r');
 threshold=0.1;
-spec=spectrogram(x,w,0,512,fs,'yaxis');
+spec=spectrogram(x,w,frame_size/2,512,fs,'yaxis');
 spec=abs(spec);
 for m=1:nFrames
     %%%%%%%%%%%%%%%%%%%%% YOUR CODE BELOW %%%%%%%%%%%%%%%%%%%%%%
@@ -76,6 +76,10 @@ for m=1:nFrames
 %     spec(:,m)=x_f;
     %%%%%%%%%%%%%%%%%%%%% YOUR CODE ABOVE %%%%%%%%%%%%%%%%%%%%%%
 end
+
+
+aaa=freqs;
+bbb=amps;
 % spec=spectrogram(x,w,0,512,fs,'yaxis');
 % spec=abs(spec);
 freqs=freqs*(pi/8000);
