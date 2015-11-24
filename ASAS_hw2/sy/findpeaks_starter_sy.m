@@ -1,4 +1,7 @@
 function [amps,freqs]=findpeaks_starter_sy(X,freqq, maxNumPeaks)
+% X=spectra{11}(:,2)
+% freqq=spectra{11}(:,1)
+
 
 % X is frequency component of one frame 
 % maxNumPeaks is the number of peaks to be extracted

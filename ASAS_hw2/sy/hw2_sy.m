@@ -78,10 +78,10 @@ for m=1:nFrames-1
 end
 aaa=freqs;
 bbb=amps;
-% figure(1)
-% plot(8000/pi*freqs');
-% xlabel('frame');
-% ylabel('hz');
+figure(1)
+plot(8000/pi*freqs');
+xlabel('frame');
+ylabel('hz');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SYNTHESIS

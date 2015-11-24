@@ -9,7 +9,7 @@ clear all; close all;
 sw.plot = 0;
 % [x,fs] = wavread('wrenpn.wav');
 % [x,fs] = wavread('peaches_16.wav');
-[x,fs] = wavread('mymom_16.wav');
+[x,fs] = wavread('draw_16.wav');
 % [x,fs] = wavread('draw_16.wav');
 x = x/max(abs(x)); sound(x,fs);
 nx = length(x);
@@ -33,20 +33,18 @@ fRatio = 2^(freqShift/12);
 amps = zeros(maxPeaks,nFrames);
 freqs = zeros(maxPeaks,nFrames);
 % x_f=zeros(1,frame_size);
-x_zp=zeros(1,N);
-w_zp=zeros(1,N);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% ANALYSIS
 %%
 %w = hanning(M);
 
-df = fs/N;
-ff = 0:df:(N-1)*df;
-frame_size=floor(nx/nFrames);
-% hopsize=180;
-w = blackman(frame_size);
-spec=zeros(frame_size,nFrames);
+% df = fs/N;
+% ff = 0:df:(N-1)*df;
+% frame_size=floor(nx/nFrames);
+% % hopsize=180;
+% w = blackman(frame_size);
+% spec=zeros(frame_size,nFrames);
 
 % demonstrate%%%%%%%%%%%%%%%%%%%%%%%%
 % s=specgram(x,512,fs);
@@ -58,9 +56,48 @@ spec=zeros(frame_size,nFrames);
 % colormap(1-gray);
 % hold on
 % plot(tt,F','r');
-threshold=0.1;
-spec=spectrogram(x,w,frame_size/2,512,fs,'yaxis');
-spec=abs(spec);
+
+w = blackman(M);
+df = fs/N;
+ff = 0:df:(N-1)*df;
+
+window_length = M;
+wav_file = x;
+hop_size = window_length/2;
+wav_length = length(wav_file);
+st_num = nFrames;
+ed_num = st_num;
+frame_num = nFrames;
+spectra = cell(frame_num,1);
+st = zeros(st_num,1);
+ed = zeros(ed_num,1);
+window_vec = w;
+
+for ii = 1:frame_num
+    if ii == 1
+        st(ii) = 1 + (window_length)*(ii-1);
+        ed(ii) = window_length*ii;
+    elseif ii == frame_num
+        st(ii) = st(ii-1) + hop_size;
+        ed(ii) = wav_length;
+    else
+        st(ii) = st(ii-1) + hop_size;
+        ed(ii) = ed(ii-1) + hop_size;
+    end
+end
+
+for ii = 1:frame_num
+    if ii ~= frame_num                
+        temp = abs(fft(wav_file(st(ii):ed(ii)).*window_vec));
+        spectra{ii} = zeros(floor(floor(length(temp)))/2+1,2);
+        spectra{ii}(:,1) = 0:fs/length(temp):fs/2;
+        spectra{ii}(:,2) = temp(1:floor(length(temp))/2+1);
+    else
+        spectra{ii} = zeros(floor(length(temp))/2+1,2);
+        spectra{ii}(:,1) = 0:(fs/length(temp)):(fs/2);
+    end
+end
+
 for m=1:nFrames
     %%%%%%%%%%%%%%%%%%%%% YOUR CODE BELOW %%%%%%%%%%%%%%%%%%%%%%
 %     x_zp(1:frame_size)=x((m-1)*frame_size+1:m*frame_size);
@@ -70,7 +107,7 @@ for m=1:nFrames
 %     x_f=x_f.*w_zp;
 %     x_f=x_f(1:frame_size);
 %     x_f=abs(x_f);
-    [amps(:,m),freqs(:,m)]=findpeaks_starter(spec(:,m),maxPeaks,threshold);
+    [amps(:,m),freqs(:,m)]=findpeaks_starter(spectra{m}(:,1),spectra{m}(:,2),maxPeaks);
 
 %     x_f=abs(x_f);
 %     spec(:,m)=x_f;
@@ -87,14 +124,14 @@ freqs=freqs*(pi/8000);
 % [S,F,T]=spectrogram(x,w,0,512,fs);
 % S=abs(S);
 % imagesc(S/max(abs(S(:))) );
-figure
+figure(1)
 spectrogram(x,w,0,512,fs,'yaxis');
 set(gca,'YDir', 'normal');
 colormap(1-gray);
 hold on;
 xx=linspace(0,1,length(freqs));
 % freqs=freqs;
-plot(xx,8000/pi*freqs');
+plot(xx,freqs');
 
 %
 xlabel('frame');
@@ -104,7 +141,7 @@ ylabel('hz');
 %% SYNTHESIS
 R = round(R* expandRatio);  % time expansion
 freqs = min(pi,freqs*fRatio);
-% freqs=freqs*8000/pi;
+freqs=freqs*8000/pi;
 y = zeros((nFrames+1)*R,1);
 state = zeros(maxPeaks,3);  % [ampInitials, freqInitials, phaseInitials] 
 state(:,1) = amps(:,1) ;
@@ -114,19 +151,20 @@ line=[];
 freqs_c=[];
 for m=1:nFrames-1
 %%%%%%%%%%%%%%%%%%%%% YOUR CODE BELOW %%%%%%%%%%%%%%%%%%%%%%
-    [y,finalState,temp_freqs] = additivesynth_starter(amps(:,m),freqs(:,m),frame_size,state,m,fs)
-    line=[line; y];
+    rr=R*(m-1)+1:1:R*(m-1)+R;
+    [y_frame,finalState,temp_freqs] = additivesynth_starter(amps(:,m),freqs(:,m),R,state,fs,rr);
+    y(rr')=y_frame;
     freqs_c=[freqs_c temp_freqs];
 %%%%%%%%%%%%%%%%%%%%% YOUR CODE ABOVE %%%%%%%%%%%%%%%%%%%%%%
 end
-y=line;
-figure
+
+figure(2)
 specgram(x,512,fs);
 colorbar off ;colormap bone;
 hold on;
 xx=1:1:length(freqs_c(1,:));
 plot(xx,freqs_c(1,:));
-figure
+figure(3)
 plot(freqs);
 
 
